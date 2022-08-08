@@ -1,13 +1,21 @@
-/*
-*  数值算法
-*/
+/**
+ * @file algo_numeric.h
+ * @author ghy (ghy_mike@163.com)
+ * @brief  数值运算的类
+ * 
+ * @version 0.1
+ * @date 2022-08-08
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 
-#ifndef GHYSTL_ALGO_NUMERIC_H_
-#define GHYSTL_ALGO_NUMERIC_H_
 
-#include "util.h"
-#include "functional.h"
-#include "iterator.h"
+#pragma once
+#ifndef _ALGO_NUMERIC_H_
+#define _ALGO_NUMERIC_H_
+
+#include "algo_base.h"
 
 namespace GHYSTL{
 
@@ -138,7 +146,7 @@ namespace GHYSTL{
 
             T result = x;
             // 如果 n = 1， 那么说明上面的循环，已经计算处结果了， n再右移一位就是 0， 下面循环就不执行
-            n >> = 1; 
+            n >>= 1; 
 
             while (n)  // 等价于 n != 0， n 为奇数，上面的循环没有执行
             {
@@ -149,6 +157,19 @@ namespace GHYSTL{
             }
             
         return result;     
+    }
+
+    
+    inline size_t _lg2(size_t n){
+        size_t k = 0;
+        for(; n > 1; n >>= 1) ++k;
+        return k;
+    }
+
+    // 集合第一个元素，开始值变为 val, val+1, .. 的序列
+    template<typename Iter, typename value_type>
+    void iota(Iter first, Iter last, value_type val){
+        for(; first != last; ++first, ++val) *first = val;
     }
 }
 #endif

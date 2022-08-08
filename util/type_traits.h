@@ -398,13 +398,13 @@ namespace GHYSTL{
     // value_type 是榨汁机 type_traits<value_type>
     template<typename value_type>
     struct is_type_pod <value_type, 
-                        void_t<typename value_type::is_POD_tag>> : true_type
+                        void_t<typename value_type::is_POD_type>> : true_type
     {
 
     };
     
-    template<typename value_type, typename = void>//is_POD_tag 是 true_type 类型， 该类型有一个 value 值和 type 类型
-    struct  is_pod : bool_type<type_traits<value_type>::is_POD_tag::value 
+    template<typename value_type, typename = void>//is_POD_type 是 true_type 类型， 该类型有一个 value 值和 type is_POD_type
+    struct  is_pod : bool_type<type_traits<value_type>::is_POD_type::value 
                                         || If<is_type_pod<value_type>::value, 
                                                 typename is_type_pod<value_type>::type,
                                                 false_type>::type::value>
@@ -424,7 +424,7 @@ namespace GHYSTL{
     {
     };
     
-    template<typename Iterator, typename = void>//is_POD_tag 是 true_type 类型， 该类型有一个 value 值和 type 类型
+    template<typename Iterator, typename = void>//is_POD_type 是 true_type 类型， 该类型有一个 value 值和 type 类型
     struct  is_mem_copy : bool_type<iterator_traits<Iterator>::memory_copy_tag::value 
                                         || If<is_typedef_mem_copy<Iterator>::value, 
                                                 typename is_typedef_mem_copy<Iterator>::type,

@@ -41,7 +41,7 @@ namespace GHYSTL{
         }
 
         inline static void deallocate(pointer ptr){
-            if(ptr) alloc::deallocate(ptr, sizeof(value_type));
+            if(ptr) alloc::deallocate(ptr, sizeof(value_type) * 1);
         }
 
         inline static void deallocate(pointer ptr, size_type n){
@@ -84,12 +84,12 @@ namespace GHYSTL{
         // 复制构造函数
         template<typename type>
         inline static void copy_construct(type* ptr, const type& val){
-            const_construct_imple(ptr, val, 
+            copy_construct_imple(ptr, val, 
                             typename GHYSTL::type_traits<type>::has_trivial_copy_constructor());
         }
 
         inline static void copy_construct(pointer ptr, const value_type& val){
-            const_construct_imple(ptr, val, 
+            copy_construct_imple(ptr, val, 
                             typename GHYSTL::type_traits<value_type>::has_trivial_copy_constructor());
         }
 
@@ -135,7 +135,7 @@ namespace GHYSTL{
         }
 
         inline static void destroy(pointer first, pointer last){
-            destroy_imple(first, last,
+            destroy_impl(first, last,
                     typename GHYSTL::type_traits<value_type>::has_trivial_destructor());
         }
 
@@ -269,7 +269,7 @@ namespace GHYSTL{
     {
     public:
         typedef allocator_base<value_type_, default_alloc>               base_type;
-        typedef typename base_type::value_typ                            value_type;
+        typedef typename base_type::value_type                           value_type;
         typedef typename base_type::pointer                              pointer;
         typedef typename base_type::const_pointer                        const_pointer;
         typedef typename base_type::reference                            reference;
@@ -307,6 +307,46 @@ namespace GHYSTL{
         {
             typedef allocator<value_type> other;
         }; 
+    };
+
+
+    template<typename value_type, typename Alloc = GHYSTL::allocator<value_type>>
+    class temporary_buffer
+    {
+    public:
+        typedef value_type*     pointer;
+        typedef Alloc           alloc;
+
+        temporary_buffer(size_t len) : len(len) { allocate_construct();}
+
+        ~temporary_buffer(){
+            alloc::destroy(first, first + len);
+            alloc::deallocate(first, len);
+        }
+
+        size_t size() const { return (len); }
+
+        pointer begin() { return (first); }
+
+        pointer end() { return (first + len); }
+    
+    private:
+        void allocate_construct(){
+            while(len){
+                try{
+                    first = alloc::allocate(len);
+                    alloc:construct(first, len);
+                } catch(_BAD_ALLOC){
+                    len >>= 1;
+                }catch(...){
+                    throw;
+                }
+            }
+        }
+
+    private:
+        size_t len;
+        pointer first;
     };
 }
 #endif

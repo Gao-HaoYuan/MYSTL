@@ -1,10 +1,18 @@
-/*
-* 工具类
-* 包括 move, forward, swap 等函数，以及 pair 等
-*/
+/**
+ * @file util.h
+ * @author ghy (ghy_mike@163.com)
+ * @brief  定义了复制函数、pair工具
+ * @version 1.0
+ * @date 2022-08-05
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 
-#ifndef GHYSTL_UTIL_H_
-#define GHYSTL_UTIL_H_
+
+#pragma once
+#ifndef _UTIL_H_
+#define _UTIL_H_
 namespace GHYSTL
 {
     template<class T1, class T2>
@@ -25,7 +33,6 @@ namespace GHYSTL
     void swap(T& a, T& b){
         T c(a); a=b; b=c;
     }
-
 
     // 复制函数
     // __cdecl和__stdcall都是参数从右到左入栈

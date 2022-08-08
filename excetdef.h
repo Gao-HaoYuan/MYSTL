@@ -9,6 +9,7 @@
  * 
  */
 
+
 #pragma once
 #ifndef _EXCETDEF_
 #define _EXCETDEF_
@@ -18,7 +19,7 @@
 
 namespace GHYSTL{
 
-#define GHTSTL_DEBUG(expr) \
+#define GHYSTL_DEBUG(expr) \
     assert(expr)
 
 #define THROW_LENGTH_ERROR_IF(expr, what) \

@@ -1,8 +1,18 @@
-/*
-* 算术类（Arthmetic）仿函数的实现
-* 这个头文件包含了 mystl 的函数对象与哈希函数
-*/
+/**
+ * @file functional.h
+ * @author ghy (ghy_mike@163.com)
+ * @brief 算术类（Arthmetic）仿函数的实现
+ *        包含函数对象与哈希函数
+ * 
+ * @version 1.0
+ * @date 2022-08-05
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 
+
+#pragma once
 #ifndef GHYSTL_FUNCTIONAL_H_
 #define GHYSTL_FUNCTIONAL_H_
 
@@ -10,7 +20,7 @@
 
 namespace GHYSTL{
 
-    // 定义一元函数的参数型别和返回值型别
+    /*----------------------------------------------  定义一元函数的参数型别和常规运算 ---------------------------------------------------*/ 
     template<class Arg, class Result>
     struct unary_function
     {
@@ -23,8 +33,8 @@ namespace GHYSTL{
     template<class Arg1, class Arg2, class Result>
     struct binary_function
     {
-        typedef Arg1     argumet_type;
-        typedef Arg2     argumet_type;
+        typedef Arg1     first_argumet_type;
+        typedef Arg2     second_argumet_type;
         typedef Result   result_type;
     };
 
@@ -105,6 +115,25 @@ namespace GHYSTL{
     {
         bool operator()(const T& x, const T& y) const { return x < y;}
     };
+
+    // std 标准库的源码，以后再改进把，这次就先这样了
+    // 注意 -> decltype(static_cast<_Ty1&&>(_Left)  意思就是返回值是这个类型 decltype 可以获取表达式类型
+
+    // template<>
+	// struct less<void>
+	// {	// transparent functor for operator<
+	// typedef int is_transparent;
+
+	// template<class _Ty1,
+	// 	class _Ty2>
+	// 	constexpr auto operator()(_Ty1&& _Left, _Ty2&& _Right) const
+	// 	-> decltype(static_cast<_Ty1&&>(_Left)
+	// 		< static_cast<_Ty2&&>(_Right))
+	// 	{	// transparently apply operator< to operands
+	// 	return (static_cast<_Ty1&&>(_Left)
+	// 		< static_cast<_Ty2&&>(_Right));
+	// 	}
+	// };
 
     // 函数对象：大于等于
     template<class T>
