@@ -96,7 +96,7 @@ namespace GHYSTL{
 	// insert_iterator实现部分, 只有提供了insert操作的容器才能使用insert_iterator  
 	////////////////////////////////////////////////////////////////////////////////
 
-    template <class Container>
+    template <typename Container>
     class insert_iterator
     {
     protected:
@@ -142,7 +142,7 @@ namespace GHYSTL{
     //    同时因为是反向迭代器, 所以重载运算符的操作要特殊处理
     ////////////////////////////////////////////////////////////////////////////////
 
-    template <class Iterator>
+    template <typename Iterator>
     class reverse_iterator
     {
     private:
@@ -227,7 +227,7 @@ namespace GHYSTL{
         }
     };
     // 重载 operator-
-    template<class Iterator>
+    template<typename Iterator>
     typename reverse_iterator<Iterator>::difference_type
     inline operator-(const reverse_iterator<Iterator>& lhs,
                 const reverse_iterator<Iterator>& rhs){

@@ -38,6 +38,6 @@ int main(int argc, char* argv[])
 	{
 		std::cout << *it << std::endl;
 	}
-	system("pause");
+	// system("pause");
 	return 0;
 }

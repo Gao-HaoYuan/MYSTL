@@ -21,6 +21,7 @@
 
 #include "../allocator/allocator.h"
 #include "../adapter/function_adapters.h"
+#include "../adapter/iterator_container_adapters.h"
 
 namespace GHYSTL{
     constexpr size_t sort_threshold = 32;

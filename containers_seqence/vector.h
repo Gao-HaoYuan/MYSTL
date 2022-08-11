@@ -2,8 +2,8 @@
  * @file vector.h
  * @author ghy (ghy_mike@163.com)
  * @brief vector 实现
- *         待添加：错误检查等
- * 
+ *         待添加：错误检查、迭代器没有提供返回变量的函数 等
+ *          
  * 
  * @version 1.0
  * @date 2022-08-08
@@ -122,6 +122,8 @@ namespace GHYSTL{
         typedef vector_const_iterator<value_type>       base_type;
 
         // 通过 using 调用父类成员变量
+        // 基类迭代器 没有提供 get_cur 的函数
+        // 通过 using 改变类变量 cur 的访问权限， 可以在类外部对 cur 操作
         using base_type::cur;
 
         vector_iterator(const pointer cur = nullptr) : base_type(cur){}

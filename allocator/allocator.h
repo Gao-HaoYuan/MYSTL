@@ -305,7 +305,7 @@ namespace GHYSTL{
         template<typename value_type>
         struct rebind
         {
-            typedef allocator<value_type> other;
+            typedef simple_allocator<value_type> other;
         }; 
     };
 

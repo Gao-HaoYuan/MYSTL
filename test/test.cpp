@@ -1,12 +1,8 @@
-#include "../containers_seqence/vector.h"
+#include "../containers_seqence/deque.h"
 
+using namespace GHYSTL;
 
+int main(){
 
-int main()  
-{   
-    
-    vector<int> x;
-    x.push_back(1);
-    std::cout<<x[0]<<std::endl;
-    return 0;  
-}  
+    return 0;
+}
