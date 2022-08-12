@@ -17,7 +17,7 @@ int main(){
 	test.push_front(-1); // 前插
 
 	std::cout << "当前元素：";
-	for (deque<int>::iterator iter = test.begin_(); iter != test.end_(); ++iter){
+	for (deque<int>::iterator iter = test.begin(); iter != test.end(); ++iter){
 		std::cout << *iter << ",";
 	}
 	std::cout << std::endl;
@@ -35,7 +35,7 @@ int main(){
 	test.pop_front(); // 前删
 	test.pop_back(); // 后删
 	std::cout << "当前元素：";
-	for (deque<int>::iterator iter = test.begin_(); iter != test.end_(); ++iter){
+	for (deque<int>::iterator iter = test.begin(); iter != test.end(); ++iter){
 		std::cout << *iter << ",";
 	}
 	std::cout << std::endl;
@@ -52,7 +52,7 @@ int main(){
 	std::cout << std::endl;
 	test.clear(); // 前删
 	std::cout << "当前元素：";
-	for (deque<int>::iterator iter = test.begin_(); iter != test.end_(); ++iter){
+	for (deque<int>::iterator iter = test.begin(); iter != test.end(); ++iter){
 		std::cout << *iter << ",";
 	}
 	std::cout << std::endl;
@@ -75,7 +75,7 @@ int main(){
 		test.push_back(i);
 	}
 	std::cout << "当前元素：";
-	for (deque<int>::iterator iter = test.begin_(); iter != test.end_(); ++iter){
+	for (deque<int>::iterator iter = test.begin(); iter != test.end(); ++iter){
 		std::cout << *iter << ",";
 	}
 	std::cout << std::endl;
@@ -98,7 +98,7 @@ int main(){
 		test.push_front(i);
 	}
 	std::cout << "当前元素：";
-	for (deque<int>::iterator iter = test.begin_(); iter != test.end_(); ++iter){
+	for (deque<int>::iterator iter = test.begin(); iter != test.end(); ++iter){
 		std::cout << *iter << ",";
 	}
 	std::cout << std::endl;

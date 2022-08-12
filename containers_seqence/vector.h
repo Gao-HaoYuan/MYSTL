@@ -228,9 +228,16 @@ namespace GHYSTL{
         // 调用默认构造函数，对 first， last， end_storage初始化 
         explicit vector(const size_type n) : vector() { 
             first = alloc::allocate(n);
-            alloc::consturct(first, n);
+            alloc::construct(first, n);
             last = end_storage = first + n;
         }
+
+        vector(const size_type n, const value_type &val) : vector() { 
+            // 用 n 个 val 初始化
+            first = alloc::allocate(n);
+            end_storage = last = alloc::copy_construct(first, n, val);
+        }
+
 
         vector(const std::initializer_list<T> &lst) : vector(lst.begin(), lst.end()){
             // 使用初始化列表 对 vector 进行初始化
@@ -390,7 +397,7 @@ namespace GHYSTL{
         }
 
         void clear(){
-            alloc::destory(first, last);
+            alloc::destroy(first, last);
             last = first;
         }
         
@@ -561,9 +568,24 @@ namespace GHYSTL{
     };
 
     template<class T, class Alloc>
-    typename vector<T, Alloc>::self& vector<T, Alloc>::operator=(const self& x){
-        vector tmp(x);
-        assign(std::move(tmp));
+    typename vector<T, Alloc>::self& vector<T, Alloc>::operator=(const self& rhs){
+        if (this != &rhs){
+            const auto len = rhs.size();
+            if (len > capacity()){ 
+                vector tmp(rhs.begin(), rhs.end());
+                swap(tmp);
+            }
+            else if (size() >= len){
+                auto i = GHYSTL::copy(rhs.begin(), rhs.end(), begin());
+                alloc::destroy(first + len, last);
+                last = first + len;
+            }
+            else{ 
+                GHYSTL::copy(rhs.begin(), rhs.begin() + size(), first);
+                alloc::copy_construct(rhs.begin() + size(), rhs.end(), last);
+                last = first + len;
+            }
+        }
         return *this;
     }
 

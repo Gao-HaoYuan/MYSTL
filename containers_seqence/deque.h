@@ -20,7 +20,6 @@
 #endif
 
 #include "../algorithm/algorithm.h"
-#include "vector.h"
 
 namespace GHYSTL{
 
@@ -325,7 +324,7 @@ public:
     typedef     value_type&                             reference;
     typedef     const value_type&                       const_reference;
     typedef     size_t                                  size_type;
-    typedef     ptrdiff_t                               differene_type;
+    typedef     ptrdiff_t                               difference_type;
     typedef     pointer*                                map_type;
     typedef     const pointer*                          const_map_type;
 
@@ -337,13 +336,13 @@ public:
     typedef     deque<value_type, Alloc, void>                                   self;
     typedef     Alloc                                                            allocator_type;
     typedef     Alloc                                                            alloc;
-    typedef     typename allocator_type::template rebind<pointer>::other        map_alloc; // rebind是一个模板，要特别声明
+    typedef     typename allocator_type::template rebind<pointer>::other         map_alloc; // rebind是一个模板，要特别声明
 
     static const size_type buffer_size = deque_buf_size<value_type>::value;
 
 private:
-    iterator     begin;  //第一个元素
-    iterator     end;   //最后一个元素
+    iterator     _begin;  //第一个元素
+    iterator     _end;   //最后一个元素
     map_type     map;    //主控中心
     size_type    map_size;   // map 内的指针数目
 
@@ -369,7 +368,7 @@ public:
     deque(const self& x) { copy_init(x.begin(), x.end(), GHYSTL::forward_iterator_tag()); } // 拷贝构造函数
 
     deque(self&& x) noexcept : 
-        begin(std::move(x.begin)), end(std::move(x.end)), map(x.map), map_size(x.map_size){ // 移动构造函数
+        _begin(std::move(x._begin)), _end(std::move(x._end)), map(x.map), map_size(x.map_size){ // 移动构造函数
         x.map = nullptr;
         x.map_size = 0;
     }
@@ -397,25 +396,25 @@ public:
     void swap(self& x) noexcept {
         if(this != x){
             GHYSTL::swap(map, x.map);
-            GHYSTL::swap(begin, x.begin);
-            GHYSTL::swap(end, x.end);
+            GHYSTL::swap(_begin, x._begin);
+            GHYSTL::swap(_end, x._end);
             GHYSTL::swap(map_size, x.map_size);
         }
     }
 
     void shrink_to_fit() noexcept {
         // 保留数据部分
-        for (auto cur = map; cur < begin.node; ++cur){
+        for (auto cur = map; cur < _begin.node; ++cur){
             alloc::deallocate(*cur, buffer_size);
             *cur = nullptr;
         }
-        for (auto cur = end.node + 1; cur < map + map_size; ++cur){
+        for (auto cur = _end.node + 1; cur < map + map_size; ++cur){
             alloc::deallocate(*cur, buffer_size);
             *cur = nullptr;
         }
 
-        map = begin.node;
-        map_size = GHYSTL::distance(begin.node, end.node);
+        map = _begin.node;
+        map_size = GHYSTL::distance(_begin.node, _end.node);
     }
 
     void resize(size_type new_size) { resize(new_size, value_type()); }
@@ -423,94 +422,94 @@ public:
     void resize(size_type new_size, const value_type& value){
        const auto len = size();
         if (new_size < len){
-            erase(begin + new_size, end);
+            erase(_begin + new_size, _end);
         }else{
-            insert(end, new_size - len, value);
+            insert(_end, new_size - len, value);
         }
     }
 
-    bool empty() const noexcept { return begin == end; }
+    bool empty() const noexcept { return _begin == _end; }
 
     allocator_type get_allocater() const { return allocator_type(); }
 
 
     iterator erase(iterator bg, iterator ed){
-        if (bg == begin && ed == end){
+        if (bg == _begin && ed == _end){
             clear();
-            return end;
+            return _end;
         }
         else{
             const size_type len = ed - bg;
-            const size_type elems_before = end - begin;
+            const size_type elems_before = _end - _begin;
 
             if (elems_before < ((size() - len) / 2)){
-                GHYSTL::copy_backward(begin, bg, ed);
-                auto new_begin = begin + len;
-                alloc::destroy(begin.cur, new_begin.cur);
-                begin = new_begin;
+                GHYSTL::copy_backward(_begin, bg, ed);
+                auto new_begin = _begin + len;
+                alloc::destroy(_begin.cur, new_begin.cur);
+                _begin = new_begin;
             }
             else
             {
-                GHYSTL::copy(ed, end, bg);
-                auto new_end = end - len;
-                alloc::destroy(new_end.cur, end.cur);
-                end = new_end;
+                GHYSTL::copy(ed, _end, bg);
+                auto new_end = _end - len;
+                alloc::destroy(new_end.cur, _end.cur);
+                _end = new_end;
             }
-            return begin + elems_before;
+            return _begin + elems_before;
         }
     }
 
     iterator erase(iterator pos) { 
         auto next = pos;
         ++next;
-        const size_type elems_before = pos - begin;
+        const size_type elems_before = pos - _begin;
         if (elems_before < (size() / 2)) //前面的少，移动前面的
         {
-            GHYSTL::copy_backward(begin, pos, next);
+            GHYSTL::copy_backward(_begin, pos, next);
             pop_front();
         }
         else{ // 后面的少移动后面的
-            GHYSTL::copy(next, end, pos);
+            GHYSTL::copy(next, _end, pos);
             pop_back();
         }
 
-        return begin + elems_before;
+        return _begin + elems_before;
     }
 
     // 清空 deque 元素，空间保留
     void clear(){
         // 因为底层的 destr 是对指针操作，iteartor的 ++ 重载了，指针不行
         // 所以要分开释放
-        for (map_type cur = begin.node + 1; cur < end.node; ++cur){
+        for (map_type cur = _begin.node + 1; cur < _end.node; ++cur){
             // 清空 deque 元素，但没释放空间
             alloc::destroy(*cur, *cur + buffer_size);
         }
 
-        if (begin.node != end.node)
+        if (_begin.node != _end.node)
         { // 有两个以上的缓冲区
-            alloc::destroy(begin.cur, begin.last);
-            alloc::destroy(end.first, end.cur);
+            alloc::destroy(_begin.cur, _begin.last);
+            alloc::destroy(_end.first, _end.cur);
         }
         else
         {
-            alloc::destroy(begin.cur, begin.last);
+            alloc::destroy(_begin.cur, _begin.last);
         }
         shrink_to_fit();
-        end = begin;
+        _end = _begin;
     }
 
     void pop_front() { 
         GHYSTL_DEBUG(!empty());
 
-        if (begin.cur != begin.last - 1){
-            alloc::destroy(begin.cur);
-            ++begin.cur;
+        if (_begin.cur != _begin.last - 1){
+            alloc::destroy(_begin.cur);
+            ++_begin.cur;
         }
         else // 如果相等，说明这个 buffer 里面只有一个元素了
         {
-            alloc::destroy(begin.cur);
-            ++begin;
-            destroy_buffer(begin.node - 1, begin.node - 1);
+            alloc::destroy(_begin.cur);
+            ++_begin;
+            destroy_buffer(_begin.node - 1, _begin.node - 1);
         }
     }
 
@@ -518,16 +517,16 @@ public:
     void pop_back() { 
         GHYSTL_DEBUG(!empty());
         
-        if (end.cur != end.first)
+        if (_end.cur != _end.first)
         {
-            alloc::destroy(end.cur);
-            --end.cur;
+            alloc::destroy(_end.cur);
+            --_end.cur;
         }
         else
         {
-            alloc::destroy(end.cur);
-            --end;
-            destroy_buffer(end.node + 1, end.node + 1);
+            alloc::destroy(_end.cur);
+            --_end;
+            destroy_buffer(_end.node + 1, _end.node + 1);
         } 
     }
 
@@ -568,7 +567,7 @@ public:
         if (first1 != last1){
             erase(first1, last1);
         }else {
-            insert_dispatch(end, first, last, GHYSTL::iter_cate_t<IIter>());
+            insert_dispatch(_end, first, last, GHYSTL::iter_cate_t<IIter>());
         }
     }
 
@@ -581,19 +580,19 @@ public:
         if (len1 < len2){
             auto next = first;
             GHYSTL::advance(next, len1);
-            GHYSTL::copy(first, next, begin);
-            insert_dispatch(end, next, last, GHYSTL::iterator_category(first));
+            GHYSTL::copy(first, next, _begin);
+            insert_dispatch(_end, next, last, GHYSTL::iterator_category(first));
         } else {
-            erase(GHYSTL::copy(first, last, begin), end); // 先复制，后删除
+            erase(GHYSTL::copy(first, last, _begin), _end); // 先复制，后删除
         }
     }
 
     // 迭代器相关操作
-    iterator begin_() noexcept { return begin; }
-    iterator end_()   noexcept { return end; }
+    iterator begin() noexcept { return _begin; }
+    iterator end()   noexcept { return _end; }
 
-    const_iterator begin_() const noexcept { return const_iterator(begin); }
-    const_iterator end_()   const noexcept { return const_iterator(end); }
+    const_iterator begin() const noexcept { return const_iterator(_begin); }
+    const_iterator end()   const noexcept { return const_iterator(_end); }
 
     const_iterator cbegin() const noexcept { return begin(); }
     const_iterator cend()   const noexcept { return end(); }
@@ -611,11 +610,11 @@ public:
     // 访问元素相关操作 
     reference operator[](const size_type n){ 
         GHYSTL_DEBUG(n < size());
-        return begin[n];
+        return _begin[n];
     }
     const_reference operator[](const size_type n) const { 
         GHYSTL_DEBUG(n < size());
-        return begin[n];
+        return _begin[n];
     }
 
     reference at(const size_type n) { 
@@ -647,19 +646,19 @@ public:
         return *(end() - 1);
     }
 
-    size_type size()     const { return end - begin; }
+    size_type size()     const { return _end - _begin; }
     size_type max_size() const { return static_cast<size_type>(-1); }
 
     /*---------------------------------------------------------- 插入元素 -------------------------------------------------------*/
 
     iterator insert(iterator position, const value_type& value){
-        if (position.cur == begin.cur){
+        if (position.cur == _begin.cur){
             push_front(value);
-            return begin;
+            return _begin;
         }
-        else if (position.cur == end.cur){
+        else if (position.cur == _end.cur){
             push_back(value);
-            auto tmp = end;
+            auto tmp = _end;
             --tmp;
             return tmp;
         }
@@ -669,19 +668,19 @@ public:
     }
 
     iterator insert(iterator pos, const size_type n, const value_type& val){
-        if (pos.cur == begin.cur)
+        if (pos.cur == _begin.cur)
         {
             require_capacity(n, true);
-            auto new_begin = begin - n;
+            auto new_begin = _begin - n;
             GHYSTL::fill_n(new_begin, n, val);
             begin = new_begin;
         }
-        else if (pos.cur == end.cur)
+        else if (pos.cur == _end.cur)
         {
             require_capacity(n, false);
-            auto new_end = end + n;
-            GHYSTL::fill_n(end, n, val);
-            end = new_end;
+            auto new_end = _end + n;
+            GHYSTL::fill_n(_end, n, val);
+            _end = new_end;
         }
         else
         {
@@ -693,13 +692,13 @@ public:
 
 
     iterator insert(iterator pos, value_type&& val){
-        if (pos.cur == begin.cur){
+        if (pos.cur == _begin.cur){
             emplace_front(std::move(val));
-            return begin;
+            return _begin;
         }
-        else if (pos.cur == end.cur){
+        else if (pos.cur == _end.cur){
             emplace_back(std::move(val));
-            auto tmp = end;
+            auto tmp = _end;
             --tmp;
             return tmp;
         }
@@ -731,13 +730,13 @@ public:
 
     template<typename ... types>
     iterator emplace(iterator pos, types&& ...args){
-        if (pos.cur == begin.cur){
+        if (pos.cur == _begin.cur){
             emplace_front(std::forward<types>(args)...);
-            return begin;
+            return _begin;
         }
-        else if (pos.cur == end.cur){
+        else if (pos.cur == _end.cur){
             emplace_back(std::forward<types>(args)...);
-            return end - 1;
+            return _end - 1;
         }
         return insert_aux(pos, std::forward<types>(args)...);
     }
@@ -745,19 +744,19 @@ public:
     // 在头部就地构建元素
     template<typename ... Args>
     void emplace_front(Args&& ...args){
-        if (begin.cur != begin.first){
-            alloc::construct(begin.cur - 1, std::forward<Args>(args)...);
-            --begin.cur;
+        if (_begin.cur != _begin.first){
+            alloc::construct(_begin.cur - 1, std::forward<Args>(args)...);
+            --_begin.cur;
         }
         else{
             require_capacity(1, true);
             try{
-                --begin;
-                alloc::construct(begin.cur, std::forward<Args>(args)...);
+                --_begin;
+                alloc::construct(_begin.cur, std::forward<Args>(args)...);
             }
             catch (...)
             {
-                ++begin;
+                ++_begin;
                 throw;
             }
         }
@@ -766,15 +765,15 @@ public:
     // 在尾部就地构建元素
     template<typename ... Args>
     void emplace_back(Args&& ...args){
-        if (end.cur != end.last - 1)
+        if (_end.cur != _end.last - 1)
         {
-            alloc::construct(end.cur, std::forward<Args>(args)...);
-            ++end.cur;
+            alloc::construct(_end.cur, std::forward<Args>(args)...);
+            ++_end.cur;
         }
         else{
             require_capacity(1, false);
-            alloc::construct(end.cur, std::forward<Args>(args)...);
-            ++end;
+            alloc::construct(_end.cur, std::forward<Args>(args)...);
+            ++_end;
         }
     }
 
@@ -839,20 +838,20 @@ private:
             throw;
         }
 
-        begin.set_node(nstart);
-        end.set_node(nfinish);
-        begin.cur = begin.first;
-        end.cur = end.first + (nElem % buffer_size);
+        _begin.set_node(nstart);
+        _end.set_node(nfinish);
+        _begin.cur = _begin.first;
+        _end.cur = _end.first + (nElem % buffer_size);
     } 
 
     // 默认值初始化
     void copy_n_default(size_type n, const value_type& value){
         map_init(n);
         if(n){
-            for(auto cur = begin.node; cur < end.node; ++cur){
+            for(auto cur = _begin.node; cur < _end.node; ++cur){
                 alloc::copy_construct(*cur, *cur + buffer_size, value);
             }
-            alloc::copy_construct(end.first, end.cur, value);
+            alloc::copy_construct(_end.first, _end.cur, value);
         }
     }
 
@@ -871,37 +870,37 @@ private:
     {
         const size_type n = GHYSTL::distance(first, last);
         map_init(n);
-        for (auto cur = begin.node; cur < end.node; ++cur)
+        for (auto cur = _begin.node; cur < _end.node; ++cur)
         {
             auto next = first;
             GHYSTL::advance(next, buffer_size);
             alloc::copy_construct(first, next, *cur);
             first = next;
         }
-        alloc::copy_construct(first, last, end.first);
+        alloc::copy_construct(first, last, _end.first);
     }
 
     void require_capacity(size_type n, bool front)
     {
-        if (front && (static_cast<size_type>(begin.cur - begin.first) < n)) // 在前面插入
+        if (front && (static_cast<size_type>(_begin.cur - _begin.first) < n)) // 在前面插入
         {
-            const size_type need_buffer = (n - (begin.cur - begin.first)) / buffer_size + 1;
+            const size_type need_buffer = (n - (_begin.cur - _begin.first)) / buffer_size + 1;
 
-            if (need_buffer > static_cast<size_type>(begin.node - map)){
+            if (need_buffer > static_cast<size_type>(_begin.node - map)){
                 reallocate_map_at_front(need_buffer);
                 return;
             }
-            create_buffer(begin.node - need_buffer, begin.node - 1);
+            create_buffer(_begin.node - need_buffer, _begin.node - 1);
         }
-        else if (!front && (static_cast<size_type>(end.last - end.cur - 1) < n)) // 在后面插入
+        else if (!front && (static_cast<size_type>(_end.last - _end.cur - 1) < n)) // 在后面插入
         {
-            const size_type need_buffer = (n - (end.last - end.cur - 1)) / buffer_size + 1;
+            const size_type need_buffer = (n - (_end.last - _end.cur - 1)) / buffer_size + 1;
 
-            if (need_buffer > static_cast<size_type>((map + map_size) - end.node - 1)){
+            if (need_buffer > static_cast<size_type>((map + map_size) - _end.node - 1)){
                 reallocate_map_at_back(need_buffer);
                 return;
             }
-            create_buffer(end.node + 1, end.node + need_buffer);
+            create_buffer(_end.node + 1, _end.node + need_buffer);
         }
     }
     
@@ -910,7 +909,7 @@ private:
         //开辟新的空间
         const size_type new_map_size = GHYSTL::max(map_size << 1, map_size + need_buffer + DEQUE_MAP_INIT_SIZE);
         map_type new_map = create_map(new_map_size);
-        const size_type old_buffer = end.node - begin.node + 1;
+        const size_type old_buffer = _end.node - _begin.node + 1;
         const size_type new_buffer = old_buffer + need_buffer;
 
         // 新的 map 中的指针指向原来的 buffer，并开辟新的 buffer
@@ -918,29 +917,29 @@ private:
         auto new_mid = new_begin + need_buffer;
         auto new_end = new_mid + old_buffer;
         create_buffer(new_begin, new_mid - 1);
-        for (auto begin_1 = new_mid, begin_2 = begin.node; begin_1 != new_end; ++begin_1, ++begin_2)
+        for (auto begin_1 = new_mid, begin_2 = _begin.node; begin_1 != new_end; ++begin_1, ++begin_2)
             *begin_1 = *begin_2;
 
         // 释放旧的 deque 内存
         map_alloc::deallocate(map, map_size);
         map = new_map;
         map_size = new_map_size;
-        begin = iterator(*new_mid + (begin.cur - begin.first), new_mid);
-        end = iterator(*(new_end - 1) + (end.cur - end.first), new_end - 1);
+        _begin = iterator(*new_mid + (_begin.cur - _begin.first), new_mid);
+        _end = iterator(*(new_end - 1) + (_end.cur - _end.first), new_end - 1);
     }
 
     void reallocate_map_at_back(size_type need_buffer)
     {
         const size_type new_map_size = GHYSTL::max(map_size << 1, map_size + need_buffer + DEQUE_MAP_INIT_SIZE);
         map_type new_map = create_map(new_map_size);
-        const size_type old_buffer = end.node - begin.node + 1;
+        const size_type old_buffer = _end.node - _begin.node + 1;
         const size_type new_buffer = old_buffer + need_buffer;
 
         // 另新的 map 中的指针指向原来的 buffer，并开辟新的 buffer
         auto new_begin = new_map + ((new_map_size - new_buffer) / 2);
         auto new_mid = new_begin + old_buffer;
         auto new_end = new_mid + need_buffer;
-        for (auto begin_1 = new_begin, begin_2 = begin.node; begin_1 != new_mid; ++begin_1, ++begin_2)
+        for (auto begin_1 = new_begin, begin_2 = _begin.node; begin_1 != new_mid; ++begin_1, ++begin_2)
             *begin_1 = *begin_2;
 
         create_buffer(new_mid, new_end - 1);
@@ -949,33 +948,33 @@ private:
         map_alloc::deallocate(map, map_size);
         map = new_map;
         map_size = new_map_size;
-        begin = iterator(*new_begin + (begin.cur - begin.first), new_begin);
-        end = iterator(*(new_mid - 1) + (end.cur - end.first), new_mid - 1);
+        _begin = iterator(*new_begin + (_begin.cur - _begin.first), new_begin);
+        _end = iterator(*(new_mid - 1) + (_end.cur - _end.first), new_mid - 1);
     }
 
     template <class... Args>
     iterator insert_aux(iterator pos, Args&& ...args)
     {
-        const size_type elems_before = pos - begin;
+        const size_type elems_before = pos - _begin;
         value_type value_copy = value_type(std::forward<Args>(args)...);
         if (elems_before < (size() / 2))
         { // 在前半段插入
             emplace_front(front());
-            auto front1 = begin;
+            auto front1 = _begin;
             ++front1;
             auto front2 = front1;
             ++front2;
-            pos = begin + elems_before;
+            pos = _begin + elems_before;
             auto cur = pos;
             ++cur;
             GHYSTL::copy(front2, cur, front1);
         } else { // 在后半段插入
             emplace_back(back());
-            auto back1 = end;
+            auto back1 = _end;
             --back1;
             auto back2 = back1;
             --back2;
-            pos = begin + elems_before;
+            pos = _begin + elems_before;
             GHYSTL::copy_backward(pos, back2, back1);
         }
         *pos = std::move(value_copy);
@@ -991,9 +990,19 @@ inline void swap(GHYSTL::deque<value_type, alloc, NoType> & left,
 
 template<typename value_type, typename alloc, typename NoType>
 typename deque<value_type, alloc, NoType>::self& 
-    deque<value_type, alloc, NoType>::operator=(const self& x){
-            deque tmp(x);
-            assign(std::move(tmp));
+    deque<value_type, alloc, NoType>::operator=(const self& rhs){
+             if (this != &rhs){
+                const auto len = size();
+
+                if (len >= rhs.size()){
+                    erase(GHYSTL::copy(rhs._begin, rhs._end, _begin), _end);
+                }
+                else{
+                    iterator mid = rhs.begin() + static_cast<difference_type>(len);
+                    GHYSTL::copy(rhs._begin, mid, _begin);
+                    insert(_end, mid, rhs._end);
+                }
+            }
             return *this;
 }
 
@@ -1001,8 +1010,8 @@ template<typename value_type, typename alloc, typename NoType>
 typename deque<value_type, alloc, NoType>::self& 
     deque<value_type, alloc, NoType>::operator=(self&& x){
             clear();
-            begin = std::move(x.begin);
-            end = std::move(x.end);
+            _begin = std::move(x._begin);
+            _end = std::move(x._end);
             x.map = nullptr;
             x.map_size = 0;
 }
@@ -1010,7 +1019,7 @@ typename deque<value_type, alloc, NoType>::self&
 template<typename value_type, typename alloc, typename NoType>
 void deque<value_type, alloc, NoType>::
 fill_insert(iterator position, size_type n, const value_type& value){
-        const size_type elems_before = position - begin;
+        const size_type elems_before = position - _begin;
         const size_type len = size();
         auto value_copy = value;
         
@@ -1018,29 +1027,29 @@ fill_insert(iterator position, size_type n, const value_type& value){
         {
             require_capacity(n, true);
             // 原来的迭代器可能会失效
-            auto old_begin = begin;
-            auto new_begin = begin - n;
-            position = begin + elems_before;
+            auto old_begin = _begin;
+            auto new_begin = _begin - n;
+            position = _begin + elems_before;
 
             try
             {
                 if (elems_before >= n){ // 插入点前的元素 比 n 大
-                    auto begin_n = begin + n;
-                    GHYSTL::copy(begin, begin_n, new_begin);
-                    begin = new_begin;
+                    auto begin_n = _begin + n;
+                    GHYSTL::copy(_begin, begin_n, new_begin);
+                    _begin = new_begin;
                     GHYSTL::copy(begin_n, position, old_begin);
                     GHYSTL::fill_n(position - n, position, value_copy);
                 } 
                 else { // 插入点前的元素 比 n 小
-                    GHYSTL::fill(GHYSTL::copy(begin, position, new_begin), begin, value_copy);
-                    begin = new_begin;
+                    GHYSTL::fill(GHYSTL::copy(_begin, position, new_begin), _begin, value_copy);
+                    _begin = new_begin;
                     GHYSTL::fill(old_begin, position, value_copy);
                 }
             }
             catch (...)
             {
-                if (new_begin.node != begin.node)
-                destroy_buffer(new_begin.node, begin.node - 1);
+                if (new_begin.node != _begin.node)
+                destroy_buffer(new_begin.node, _begin.node - 1);
                 throw;
             }
         }
@@ -1048,32 +1057,32 @@ fill_insert(iterator position, size_type n, const value_type& value){
         {
             require_capacity(n, false);
             // 原来的迭代器可能会失效
-            auto old_end = end;
-            auto new_end = end + n;
+            auto old_end = _end;
+            auto new_end = _end + n;
             const size_type elems_after = len - elems_before;
-            position = end - elems_after;
+            position = _end - elems_after;
 
             try
             {
                 if (elems_after > n)
                 {
-                    auto end_n = end - n;
-                    GHYSTL::copy(end_n, end, end);
-                    end = new_end;
+                    auto end_n = _end - n;
+                    GHYSTL::copy(end_n, _end, _end);
+                    _end = new_end;
                     GHYSTL::copy_backward(position, end_n, old_end);
                     GHYSTL::fill(position, position + n, value_copy);
                 }
                 else {
-                    GHYSTL::fill_n(end, position + n, value_copy);
-                    GHYSTL::copy(position, end, position + n);
-                    end = new_end;
+                    GHYSTL::fill_n(_end, position + n, value_copy);
+                    GHYSTL::copy(position, _end, position + n);
+                    _end = new_end;
                     GHYSTL::fill(position, old_end, value_copy);
                 }
             }
             catch (...)
             {
-                if(new_end.node != end.node)
-                destroy_buffer(end.node + 1, new_end.node);
+                if(new_end.node != _end.node)
+                destroy_buffer(_end.node + 1, new_end.node);
                 throw;
             }
         }
@@ -1083,20 +1092,20 @@ fill_insert(iterator position, size_type n, const value_type& value){
 template <typename value_type, typename alloc, typename NoType>
 void deque<value_type, alloc, NoType>::
 push_front(const value_type& value){
-  if (begin.cur != begin.first) { // 有空间
-    alloc::construct(begin.cur - 1, value);
-    --begin.cur;
+  if (_begin.cur != _begin.first) { // 有空间
+    alloc::construct(_begin.cur - 1, value);
+    --_begin.cur;
   }
   else{ // 没空间
     require_capacity(1, true);
     try
     {
-      --begin;
-      alloc::construct(begin.cur, value);
+      --_begin;
+      alloc::construct(_begin.cur, value);
     }
     catch (...)
     {
-      ++begin;
+      ++_begin;
       throw;
     }
   }
@@ -1107,14 +1116,14 @@ template <typename value_type, typename alloc, typename NoType>
 void deque<value_type, alloc, NoType>::
 push_back(const value_type& value)
 {
-  if (end.cur != end.last - 1){
-    alloc::construct(end.cur, value);
-    ++end.cur;
+  if (_end.cur != _end.last - 1){
+    alloc::construct(_end.cur, value);
+    ++_end.cur;
   }
   else{
     require_capacity(1, false);
-    alloc::construct(end.cur, value);
-    ++end;
+    alloc::construct(_end.cur, value);
+    ++_end;
   }
 }
 
@@ -1123,37 +1132,37 @@ template <class FIter>
 void deque<value_type, alloc, NoType>::
 copy_insert(iterator position, FIter first, FIter last, size_type n)
 {
-  const size_type elems_before = position - begin;
+  const size_type elems_before = position - _begin;
   auto len = size();
 
   if (elems_before < (len / 2)){
     require_capacity(n, true);
     // 原来的迭代器可能会失效
-    auto old_begin = begin;
-    auto new_begin = begin - n;
-    position = begin + elems_before;
+    auto old_begin = _begin;
+    auto new_begin = _begin - n;
+    position = _begin + elems_before;
 
     try
     {
       if (elems_before >= n){
-        auto begin_n = begin + n;
-        GHYSTL::copy(begin, begin_n, new_begin);
-        begin = new_begin;
+        auto begin_n = _begin + n;
+        GHYSTL::copy(_begin, begin_n, new_begin);
+        _begin = new_begin;
         GHYSTL::copy(begin_n, position, old_begin);
         GHYSTL::copy(first, last, position - n);
       }
       else{
         auto mid = first;
         GHYSTL::advance(mid, n - elems_before);
-        GHYSTL::copy(first, mid, GHYSTL::copy(begin, position, new_begin));
-        begin_ = new_begin;
+        GHYSTL::copy(first, mid, GHYSTL::copy(_begin, position, new_begin));
+        _begin = new_begin;
         GHYSTL::copy(mid, last, old_begin);
       }
     }
     catch (...)
     {
-      if(new_begin.node != begin.node)
-        destroy_buffer(new_begin.node, begin.node - 1);
+      if(new_begin.node != _begin.node)
+        destroy_buffer(new_begin.node, _begin.node - 1);
       throw;
     }
   }
@@ -1161,17 +1170,17 @@ copy_insert(iterator position, FIter first, FIter last, size_type n)
   {
     require_capacity(n, false);
     // 原来的迭代器可能会失效
-    auto old_end = end;
-    auto new_end = end + n;
+    auto old_end = _end;
+    auto new_end = _end + n;
     const auto elems_after = len - elems_before;
-    position = end - elems_after;
+    position = _end - elems_after;
 
     try
     {
       if (elems_after > n){
-        auto end_n = end - n;
-        GHYSTL::copy(end_n, end, end);
-        end = new_end;
+        auto end_n = _end - n;
+        GHYSTL::copy(end_n, _end, _end);
+        _end = new_end;
         GHYSTL::copy_backward(position, end_n, old_end);
         GHYSTL::copy(first, last, position);
       }
@@ -1179,15 +1188,15 @@ copy_insert(iterator position, FIter first, FIter last, size_type n)
       {
         auto mid = first;
         GHYSTL::advance(mid, elems_after);
-        GHYSTL::copy(position, end, GHYSTL::copy(mid, last, end));
-        end = new_end;
+        GHYSTL::copy(position, _end, GHYSTL::copy(mid, last, _end));
+        _end = new_end;
         GHYSTL::copy(first, mid, position);
       }
     }
     catch (...)
     {
-      if(new_end.node != end.node)
-        destroy_buffer(end.node + 1, new_end.node);
+      if(new_end.node != _end.node)
+        destroy_buffer(_end.node + 1, new_end.node);
       throw;
     }
   }
@@ -1201,7 +1210,7 @@ insert_dispatch(iterator position, IIter first, IIter last, GHYSTL::input_iterat
     if (last <= first)  return;
 
     const size_type n = GHYSTL::distance(first, last);
-    const size_type elems_before = position - begin;
+    const size_type elems_before = position - _begin;
 
     if (elems_before < (size() / 2)){
         require_capacity(n, true);
@@ -1209,11 +1218,10 @@ insert_dispatch(iterator position, IIter first, IIter last, GHYSTL::input_iterat
         require_capacity(n, false);
     }
 
-    position = begin + elems_before;
+    position = _begin + elems_before;
     auto cur = --last;
 
-    for (size_type i = 0; i < n; ++i, --cur)
-    {
+    for (size_type i = 0; i < n; ++i, --cur){
         insert(position, *cur);
     }
 }
@@ -1227,31 +1235,31 @@ insert_dispatch(iterator position, FIter first, FIter last, GHYSTL::forward_iter
 
   const size_type n = GHYSTL::distance(first, last);
 
-  if (position.cur == begin.cur)
+  if (position.cur == _begin.cur)
   {
     require_capacity(n, true);
-    auto new_begin = begin - n;
+    auto new_begin = _begin - n;
 
     try{
       GHYSTL::copy(first, last, new_begin);
-      begin = new_begin;
+      _begin = new_begin;
     }
     catch (...){
-      if(new_begin.node != begin.node)
-        destroy_buffer(new_begin.node, begin.node - 1);
+      if(new_begin.node != _begin.node)
+        destroy_buffer(new_begin.node, _begin.node - 1);
       throw;
     }
   }
-  else if (position.cur == end.cur){
+  else if (position.cur == _end.cur){
     require_capacity(n, false);
-    auto new_end = end + n;
+    auto new_end = _end + n;
     try{
-      GHYSTL::copy(first, last, end);
-      end = new_end;
+      GHYSTL::copy(first, last, _end);
+      _end = new_end;
     }
     catch (...){
-      if(new_end.node != end.node)
-        destroy_buffer(end.node + 1, new_end.node);
+      if(new_end.node != _end.node)
+        destroy_buffer(_end.node + 1, new_end.node);
       throw;
     }
   }

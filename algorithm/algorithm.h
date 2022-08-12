@@ -686,6 +686,11 @@ namespace GHYSTL{
         GHYSTL::_pop_heap_imple(first, last, less<RIter>());
     }
 
+    template<typename RIter, typename Comp>
+    inline void pop_heap(RIter first, RIter last, const Comp& cmp){
+        GHYSTL::_pop_heap_imple(first, last, cmp);
+    }
+
     template<typename RIter>
     inline void sort_heap(RIter first, RIter last){
         GHYSTL::sort_heap(first, last, less<RIter>());

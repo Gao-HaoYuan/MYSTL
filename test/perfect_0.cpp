@@ -31,11 +31,11 @@ void tes(ptrdiff_t &n){
     n=n+10;
 }
 
-int main(){
-    tmp *test;
+template<typename type>
+using D = typename tmp_traits<type>::diff;
 
-    using D = typename tmp_traits<tmp>::diff;
-    D p=0;
+int main(){
+    D<tmp> p=0;
 
     tes(p);
 
