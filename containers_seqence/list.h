@@ -60,7 +60,7 @@ class list_const_iterator
 {
 public:
     template<typename value_type, typename alloc>
-    friend class list; // 友元类
+    friend class list; // 友元类， 使用这个友元让list直接访问 get_node 函数
 
     typedef GHYSTL::bidirectional_iterator_tag                  iterator_category;
     typedef value_type_                                         value_type;
@@ -662,6 +662,9 @@ void list<value_type, alloc>::merge(self& lst, const Compare& cmp){
         }
 }
 
+// 模板没必要写出来默认值 ----> Compare
+// 参数的缺省值也没必要写出来 -----> cmp = Compare()
+// 所有的默认值在类的声明处给出就行， 编译器会根据类名匹配自动在类里寻找对应的方法
 template<typename value_type, typename alloc>
 template<typename Compare>
 typename list<value_type, alloc>::iterator list<value_type, alloc>::
