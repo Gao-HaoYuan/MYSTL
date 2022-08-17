@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <new>
+#include <iostream>
 
 #include "../excetdef.h"
 #include "../Iterator/iterator.h"
@@ -175,7 +176,7 @@ namespace GHYSTL{
         if(bytes > (size_t)_MAX_BYTES){
             return (malloc_alloc::allocate(bytes));
         }
-            
+
         // 选择 自由链表 编号
         obj* volatile *my_list = free_list + FREELIST_INDEX(bytes);
         obj* result = *my_list;
@@ -244,7 +245,7 @@ namespace GHYSTL{
                 current_obj->free_list_next = nullptr;
                 break;
             }
-            next_obj = (obj*)((char*)next_obj+bytes);
+            next_obj = (obj*)((char*)next_obj + bytes);
             current_obj->free_list_next = next_obj;
         }
 
@@ -260,7 +261,7 @@ namespace GHYSTL{
 
         if(bytes_left >= bytes_need){
             result = start_free;
-            start_free = start_free + bytes_need;
+            start_free += bytes_need;
             return result;
         } else if(bytes_left >= bytes){ // 提供不了 nobjs 个块的内存
             nobjs = bytes_left / bytes;

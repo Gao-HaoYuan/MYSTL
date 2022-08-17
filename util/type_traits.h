@@ -432,5 +432,43 @@ namespace GHYSTL{
     {
         
     };
+
+
+    template <class T>
+    struct has_iterator_cat
+    {
+        private:
+            struct two { char a; char b; };
+            template <class U> static two test(...);
+            template <class U> static char test(typename U::iterator_category* = 0);
+        public:
+            static const bool value = sizeof(test<T>(0)) == sizeof(char);
+    };
+
+    // 萃取某种迭代器
+    // is_convertible 判断是否可以被转化  第一个参数的类型 可以转化为第二个参数的类型
+    template <class T, class U, bool = has_iterator_cat<iterator_traits<T>>::value>
+    struct has_iterator_cat_of  
+        : public bool_constant<std::is_convertible<typename iterator_traits<T>::iterator_category, U>::value> 
+    {}; 
+
+
+    template <class T, class U>
+    struct has_iterator_cat_of<T, U, false> : public false_type {};
+
+    template <class Iter>
+    struct is_input_iterator : public has_iterator_cat_of<Iter, input_iterator_tag> {};
+
+    template <class Iter>
+    struct is_output_iterator : public has_iterator_cat_of<Iter, output_iterator_tag> {};
+
+    template <class Iter>
+    struct is_forward_iterator : public has_iterator_cat_of<Iter, forward_iterator_tag> {};
+
+    template <class Iter>
+    struct is_bidirectional_iterator : public has_iterator_cat_of<Iter, bidirectional_iterator_tag> {};
+
+    template <class Iter>
+    struct is_random_access_iterator : public has_iterator_cat_of<Iter, random_access_iterator_tag> {};
 }
 #endif

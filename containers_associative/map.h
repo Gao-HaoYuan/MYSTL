@@ -1,7 +1,7 @@
 /**
  * @file map.h
  * @author ghy (ghy_mike@163.com)
- * @brief map的实现
+ * @brief map + multi_map 的实现
  * 
  * @version 1.0
  * @date 2022-08-15

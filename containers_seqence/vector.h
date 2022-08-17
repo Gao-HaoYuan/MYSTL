@@ -282,7 +282,7 @@ namespace GHYSTL{
         bool empty() const noexcept { return first == last; }
 
         reference operator[](const size_type n){
-            GHYSTL_DEBUG(n < size()); 
+            GHYSTL_DEBUG(n <= size()); 
             return *(first + n); 
         }
 
@@ -322,9 +322,11 @@ namespace GHYSTL{
 
         // 与另一个 vector 交换
         void swap(self& x) noexcept {
-            std::swap(first, x.first);
-            std::swap(last, x.last);
-            std::swap(end_storage, x.end_storage);
+            if(this != &x){
+                GHYSTL::swap(first, x.first);
+                GHYSTL::swap(last, x.last);
+                GHYSTL::swap(end_storage, x.end_storage);
+            }
         }
 
         allocator_type get_allocator() const {
@@ -445,8 +447,8 @@ namespace GHYSTL{
             }else{
                 pointer ptr = alloc::allocate(n);
                 alloc::copy_construct(first, last, ptr);
-                alloc::construct(ptr + size(), ptr + n, val);
-                deallocate_and_update_ptr(ptr, ptr + n, val);
+                alloc::copy_construct(ptr + size(), ptr + n, val);
+                deallocate_and_update_ptr(ptr, ptr + n, n);
             }
         }
 

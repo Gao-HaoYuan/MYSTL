@@ -15,7 +15,7 @@
 #ifndef _ALGORITHM_H_
 #define _ALGORITHM_H_
 
-
+#include <iostream>
 #include "algo_numeric.h"
 
 namespace GHYSTL{
@@ -408,6 +408,7 @@ namespace GHYSTL{
             // 当 first mid len， 这种情况不是跳出条件  
             // first(mid) len 这种才是跳出条件， 此时，++mid = len, 是第一个不满足表达式 cmp(*mid, val) 的值.
             // 注意下面 val 和 mid 的顺序区别
+            std::cout<< *mid << std::endl;
             if(cmp(*mid, val)){ 
                 first = ++mid;
                 len = len - half -1;
@@ -421,7 +422,7 @@ namespace GHYSTL{
 
     template<typename FIter, typename value_type>
     inline FIter lower_bound(FIter first, FIter last, const value_type& val){
-        return GHYSTL::lower_bound(first, last, val, less<FIter>());
+        return GHYSTL::lower_bound(first, last, val, less<value_type>());
     }
 
     template<typename FIter, typename value_type, typename Comp>
@@ -451,7 +452,7 @@ namespace GHYSTL{
 
     template<typename FIter, typename value_type>
     inline FIter upper_bound(FIter first, FIter last, const value_type& val){
-        return GHYSTL::upper_bound(first, last, val, less<FIter>());
+        return GHYSTL::upper_bound(first, last, val, less<value_type>());
     }
 
     template<typename FIter, typename value_type, typename Comp>
@@ -465,7 +466,7 @@ namespace GHYSTL{
 
     template<typename FIter, typename value_type>
     inline bool binary_search(FIter first, FIter last, const value_type& val){
-        return GHYSTL::binary_search(first, last, val, less<FIter>());
+        return GHYSTL::binary_search(first, last, val, less<value_type>());
     }
 
     // 后缀反转， 可以用于全排列， 返回容器的下一个组合

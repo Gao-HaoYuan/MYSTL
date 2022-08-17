@@ -1,7 +1,7 @@
 /**
  * @file set.h
  * @author ghy (ghy_mike@163.com)
- * @brief set的实现
+ * @brief set + multi_set 的实现
  * 
  * @version 1.0
  * @date 2022-08-15

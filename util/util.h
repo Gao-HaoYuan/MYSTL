@@ -26,7 +26,83 @@ namespace GHYSTL
 
         pair() : first(T1()), second(T2()){}
         pair(const T1& a, const T2& b) : first(a), second(b){}
+
+        pair(const pair<T1, T2>& rhs) = default;
+        pair(pair<T1, T2>&& rhs) = default;
+
+        pair& operator=(const pair<T1, T2>& rhs) {
+            if(this != &rhs){
+                first = rhs.first;
+                second = rhs.second;
+            }
+            
+            return *this;
+        }
+
+        pair& operator=(pair<T1, T2>&& rhs) {
+            if (this != &rhs){
+                first = std::move(rhs.first);
+                second = std::move(rhs.second);
+            }
+
+            return *this;
+        }
+
+        ~pair() = default;
+
+        void swap(pair<T1, T2>& other) {
+            if (this != &other) {
+                std::swap(first, other.first);
+                std::swap(second, other.second);
+            }
+        }
+
     };
+
+    // 重载比较操作符 
+    template <class Ty1, class Ty2>
+    bool operator==(const pair<Ty1, Ty2>& lhs, const pair<Ty1, Ty2>& rhs) {
+        return lhs.first == rhs.first && lhs.second == rhs.second;
+    }
+
+    template <class Ty1, class Ty2>
+    bool operator<(const pair<Ty1, Ty2>& lhs, const pair<Ty1, Ty2>& rhs) {
+        return lhs.first < rhs.first || (lhs.first == rhs.first && lhs.second < rhs.second);
+    }
+
+    template <class Ty1, class Ty2>
+    bool operator!=(const pair<Ty1, Ty2>& lhs, const pair<Ty1, Ty2>& rhs) {
+        return !(lhs == rhs);
+    }
+
+    template <class Ty1, class Ty2>
+    bool operator>(const pair<Ty1, Ty2>& lhs, const pair<Ty1, Ty2>& rhs) {
+        return rhs < lhs;
+    }
+
+    template <class Ty1, class Ty2>
+    bool operator<=(const pair<Ty1, Ty2>& lhs, const pair<Ty1, Ty2>& rhs) {
+        return !(rhs < lhs);
+    }
+
+    template <class Ty1, class Ty2>
+    bool operator>=(const pair<Ty1, Ty2>& lhs, const pair<Ty1, Ty2>& rhs) {
+        return !(lhs < rhs);
+    }
+
+    // 重载的 swap
+    template <class Ty1, class Ty2>
+    void swap(pair<Ty1, Ty2>& lhs, pair<Ty1, Ty2>& rhs) {
+        lhs.swap(rhs);
+    }
+
+    // 全局函数，让两个数据成为一个 pair
+    template <class Ty1, class Ty2>
+    pair<Ty1, Ty2> make_pair(Ty1&& first, Ty2&& second) {
+        return pair<Ty1, Ty2>(std::forward<Ty1>(first), std::forward<Ty2>(second));
+    }
+
+/*---------------------------------------------------- 工具函数 --------------------------------------------------*/
 
     // 交换函数
     template<class T>
