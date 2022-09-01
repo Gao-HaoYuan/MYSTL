@@ -669,7 +669,8 @@ namespace GHYSTL{
             right_index = (size_t)(index << 1) + 2;
         }
 
-        if(right_index == len && cmp(val, *first + (--right_index))){//存在左节点，堆是完全二茶树
+        if(right_index == len && cmp(val, *first + (--right_index))){//存在左节点，堆是完全二叉树
+	    *(first + index) = std::move(*(first + right_index));
             index = right_index;
         } 
         *(first + index) = std::move(val);
