@@ -67,8 +67,9 @@ namespace GHYSTL{
         typedef val_type value_type;
         typedef integral_constant<value_type, val> type; 
 
-        // 实现对象类型转化，将类对象隐式转换成 value_type 类型   
-        // cout<< integral_constant <<endl; 就是调用这个函数
+        // 实现对象类型转化，将类对象隐式转换成 value_type 类型，注意是将类对象隐式转换，而不是类  
+        // cout<< integral_constant() <<endl; 就是调用这个函数
+	// integral_constant a; cout << a << endl; 也是调用这个函数
         constexpr operator value_type() const noexcept { return (value); }
 
         // 重载括号运算符
