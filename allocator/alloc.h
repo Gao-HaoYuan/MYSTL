@@ -49,8 +49,6 @@ namespace GHYSTL{
             return (result);
         }
         
-        // 函数指针
-        // 写了一个默认实现，也可以通过这个方法修改函数指针指向写入自己的函数
         // 等价于 (*set_malloc_handler(void (*f)))
         // 等价于 (*set_malloc_handler(void (*f)))()
         // C++ 编译器会自动去掉没有用的括号
