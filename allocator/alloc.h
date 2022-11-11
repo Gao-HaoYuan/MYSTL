@@ -49,9 +49,9 @@ namespace GHYSTL{
             return (result);
         }
         
-        // 等价于 (*set_malloc_handler(void (*f)))
-        // 等价于 (*set_malloc_handler(void (*f)))()
-        // C++ 编译器会自动去掉没有用的括号
+        // 这是一个函数
+        // 返回值类型 一个函数指针
+        // (*p)() 是一个函数指针的写法， 这里 p 就是 set_malloc_handler(void (*f)())
         static void *set_malloc_handler(void (*f)()){
             void (*old)() = malloc_alloc_oom_handler;
             malloc_alloc_oom_handler = f;
